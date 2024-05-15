@@ -19,10 +19,10 @@ M.crayon_config = {
     },
 
     keybindings = {
-        standard = "<leader>TT",
-        light    = "<leader>TL",
-        dark     = "<leader>TD",
-        darkest  = "<leader>Td"
+        standard = "<leader>ts",
+        light    = "<leader>tl",
+        dark     = "<leader>td",
+        darkest  = "<leader>tD"
     },
 
     special_themes = {
@@ -30,7 +30,7 @@ M.crayon_config = {
             -- name = "vscode",
             -- mode = "dark",
             -- transparency = false,
-            -- keybinding = "<leader>TTv"
+            -- keybinding = "<leader>ttv"
         -- },
     }
 }

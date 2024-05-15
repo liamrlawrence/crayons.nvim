@@ -74,7 +74,7 @@ require("crayons").setup({
             name = "vscode",             -- Theme name
             mode = "dark",               -- "dark" or "light"
             transparency = true,         -- true or false
-            keybinding = "<leader>TTv",  -- custom binding
+            keybinding = "<leader>ttv",  -- custom binding
         },
         -- ...
     }
@@ -87,10 +87,10 @@ Keybindings allow you to quickly switch between different theme variants. You ca
 ```lua
 require("crayons").setup({
     keybindings = {
-        standard = "<leader>TT",
-        light    = "<leader>TL",
-        dark     = "<leader>TD",
-        darkest  = "<leader>Td"
+        standard = "<leader>tt",
+        light    = "<leader>tl",
+        dark     = "<leader>td",
+        darkest  = "<leader>tD"
     }
 })
 ```
@@ -99,10 +99,10 @@ require("crayons").setup({
 ### Switching Themes
 You can use crayons.nvim to switch between themes and their variants through pre-configured keybindings:
 
--   **Standard Theme**: `<leader>TT#` - Switch to the standard variant of a theme, where `#` is the index number of the theme.
--   **Light Theme**: `<leader>TL#` - Switch to the light variant of a theme.
--   **Dark Theme**: `<leader>TD#` - Switch to the dark variant of a theme.
--   **Darkest Theme with Transparency**: `<leader>Td#` - Switch to the darkest variant of a theme with transparency enabled.
+-   **Standard Theme**: `<leader>tt#` - Switch to the standard variant of a theme, where `#` is the index number of the theme.
+-   **Light Theme**: `<leader>tl#` - Switch to the light variant of a theme.
+-   **Dark Theme**: `<leader>td#` - Switch to the dark variant of a theme.
+-   **Darkest Theme with Transparency**: `<leader>tD#` - Switch to the darkest variant of a theme with transparency enabled.
 
 ## License
 crayons.nvim is released under the MIT License.
