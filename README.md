@@ -1,5 +1,5 @@
 # crayons.nvim
-crayons.nvim dynamically manages and applies color schemes and theme settings. It provides a straightforward way to switch between various themes and configurations directly within Neovim.
+crayons.nvim dynamically manages and applies colorschemes and theme settings. It provides a straightforward way to switch between various themes and configurations directly within Neovim.
 
 ## Features
 - **Theme Management**: Easily switch between multiple themes with predefined variants.
@@ -36,8 +36,7 @@ return {
 The `crayons.nvim` setup function allows you to customize and extend the plugin according to your needs. Below are the configuration options available:
 
 ### Adding New Themes
-You can add new themes or modify existing ones by including them in the `themes` table during setup. Each theme has several variants (standard, light, dark, darkest). Here’s how you can add a new theme:
-
+You can add new themes or modify existing ones by including them in the `themes` table during setup. Each theme has several variants (standard, light, dark, darkest).
 ```lua
 require("crayons").setup({
     themes = {
@@ -66,13 +65,12 @@ require("crayons").setup({
 
 ### Adding Special Themes
 Special themes are ones that have a single variant and you want to assign unique settings, such as transparency and a specific keybindings. You can configure special themes in the `special_themes` section of the setup:
-
 ```lua
 require("crayons").setup({
     special_themes = {
         {
-            name = "vscode",             -- Theme name
-            mode = "dark",               -- "dark" or "light"
+            colorscheme = "vscode",      -- colorscheme name
+            background = "dark",         -- "dark" or "light"
             transparency = true,         -- true or false
             keybinding = "<leader>ttv",  -- custom binding
         },
@@ -81,9 +79,24 @@ require("crayons").setup({
 })
 ```
 
+### Adding Filetype Themes
+Filetype themes allow you to specify a specific colorscheme based on file extension. This is particularly useful if you want to have a consistent theme for something like Markdown files.
+```lua
+require("crayons").setup({
+    filetype_themes = {
+        {
+            colorscheme = "gruvbox-light",  -- colorscheme name
+            background = "light",           -- "dark" or "light"
+            transparency = false,           -- true or false
+            pattern = "*.md",               -- autocmd pattern
+        },
+        -- ...
+    }
+})
+```
+
 ### Customizing Keybindings
 Keybindings allow you to quickly switch between different theme variants. You can customize these keybindings in the `keybindings` field of the setup. Here's how to set up custom keybindings for switching themes:
-
 ```lua
 require("crayons").setup({
     keybindings = {

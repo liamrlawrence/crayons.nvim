@@ -1,3 +1,4 @@
+local augroup = vim.api.nvim_create_augroup("crayons-group", {})
 local Config = require("cabinet").config_manager
 
 local M = {}
@@ -10,8 +11,8 @@ M.crayon_config = {
             name = "built-in",
             variants = {
                 standard = "default",
-                light    = "shine",
-                dark     = "desert",
+                light    = "default",
+                dark     = "default",
                 darkest  = "default",
             }
         },
@@ -22,32 +23,38 @@ M.crayon_config = {
         standard = "<leader>ts",
         light    = "<leader>tl",
         dark     = "<leader>td",
-        darkest  = "<leader>tD"
+        darkest  = "<leader>tD",
     },
 
     special_themes = {
         -- Example: {
-            -- name = "vscode",
-            -- mode = "dark",
-            -- transparency = false,
-            -- keybinding = "<leader>ttv"
+        --     colorscheme = "vscode",
+        --     background = "dark",
+        --     transparency = false,
+        --     keybinding = "<leader>ttv",
         -- },
-    }
+    },
+
+    filetype_themes = {
+        -- Example: {
+        --     colorscheme = "gruvbox",
+        --     background = "light",
+        --     transparency = false,
+        --     pattern = "*.md",
+        -- },
+    },
 }
 
 
-local function set_theme(theme_name, theme_mode, theme_transparency)
-    vim.o.background = theme_mode
-    vim.cmd.colorscheme(theme_name)
+local function set_theme(theme_colorscheme, theme_background, theme_transparency, save_theme)
+    vim.o.background = theme_background
+    vim.cmd.colorscheme(theme_colorscheme)
     if theme_transparency then
-        vim.api.nvim_set_hl(0, "LineNr",            { bg = "none" })
-        vim.api.nvim_set_hl(0, "SignColumn",        { bg = "none" })
-        vim.api.nvim_set_hl(0, "Normal",            { bg = "none" })
-        vim.api.nvim_set_hl(0, "NormalFloat",       { bg = "none" })
-        vim.api.nvim_set_hl(0, "GitGutterAdd",      { bg = "none", fg = "#009900" })
-        vim.api.nvim_set_hl(0, "GitGutterChange",   { bg = "none", fg = "#bbbb00" })
-        vim.api.nvim_set_hl(0, "GitGutterDelete",   { bg = "none", fg = "#ff2222" })
-        vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+        vim.api.nvim_set_hl(0, "LineNr",        { bg = "none" })
+        vim.api.nvim_set_hl(0, "SignColumn",    { bg = "none" })
+        vim.api.nvim_set_hl(0, "Normal",        { bg = "none" })
+        vim.api.nvim_set_hl(0, "NormalFloat",   { bg = "none" })
+        vim.api.nvim_set_hl(0, "Normal",        { bg = "none" })
     end
 
     -- Highlight current parameter when looking at a Signature
@@ -60,13 +67,38 @@ local function set_theme(theme_name, theme_mode, theme_transparency)
         bold = true
     })
 
-    -- Save settings
-    local config_data = {
-        theme_name = theme_name,
-        theme_mode = theme_mode,
-        theme_transparency = theme_transparency
+    if save_theme then
+        M.current_theme = {
+            colorscheme = theme_colorscheme,
+            background = theme_background,
+            transparency = theme_transparency
+        }
+        Config.save("theme_config", M.current_theme)
+    end
+end
+
+
+function M.load_config()
+    local theme_colorscheme, theme_background, theme_transparency
+    local loaded_config = Config.load("theme_config")
+    if loaded_config then
+        theme_colorscheme = loaded_config.colorscheme
+        theme_background = loaded_config.background
+        theme_transparency = loaded_config.transparency
+    else
+        -- Fallback if config file doesn't exist
+        theme_colorscheme = M.crayon_config.themes[1]["variants"]["standard"]
+        theme_background = "dark"
+        theme_transparency = false
+    end
+
+    local config = {
+        colorscheme = theme_colorscheme,
+        background = theme_background,
+        transparency = theme_transparency,
     }
-    Config.save("theme_config", config_data)
+
+    return config
 end
 
 
@@ -81,35 +113,42 @@ function M.setup(user_config)
         M.crayon_config = vim.tbl_deep_extend("force", M.crayon_config, user_config)
     end
 
-    -- Register keybindings for standard themes
-    for index, theme_info in ipairs(M.crayon_config.themes) do
-        local name = theme_info.name
-        local themes = theme_info.variants
-        vim.keymap.set("n", M.crayon_config.keybindings.standard .. index, function() set_theme(themes.standard, "dark", false) end)
-        vim.keymap.set("n", M.crayon_config.keybindings.light .. index, function() set_theme(themes.light, "light", false) end)
-        vim.keymap.set("n", M.crayon_config.keybindings.dark .. index, function() set_theme(themes.dark, "dark", false) end)
-        vim.keymap.set("n", M.crayon_config.keybindings.darkest .. index, function() set_theme(themes.darkest, "dark", true) end)
-    end
-
-    -- Register keybindings for special themes
-    for _, special in ipairs(M.crayon_config.special_themes) do
-        vim.keymap.set("n", special.keybinding, function() set_theme(special.name, special.mode, special.transparency) end)
-    end
-
     -- Load saved configuration
-    local theme_name, theme_mode, theme_transparency
-    local loaded_config = Config.load("theme_config")
-    if loaded_config then
-        theme_name = loaded_config.theme_name
-        theme_mode = loaded_config.theme_mode
-        theme_transparency = loaded_config.theme_transparency
-    else
-        -- Fallback if config file doesn't exist
-        theme_name = M.crayon_config.themes[1]["variants"]["standard"]
-        theme_mode = "dark"
-        theme_transparency = false
+    local config = M.load_config()
+    set_theme(config.colorscheme, config.background, config.transparency, true)
+
+    -- Register keybinds for standard themes
+    for index, theme_info in ipairs(M.crayon_config.themes) do
+        --local name = theme_info.name
+        local themes = theme_info.variants
+        vim.keymap.set("n", M.crayon_config.keybindings.standard .. index, function() set_theme(themes.standard, "dark", false, true) end)
+        vim.keymap.set("n", M.crayon_config.keybindings.light .. index, function() set_theme(themes.light, "light", false, true) end)
+        vim.keymap.set("n", M.crayon_config.keybindings.dark .. index, function() set_theme(themes.dark, "dark", false, true) end)
+        vim.keymap.set("n", M.crayon_config.keybindings.darkest .. index, function() set_theme(themes.darkest, "dark", true, true) end)
     end
-    set_theme(theme_name, theme_mode, theme_transparency)
+
+    -- Register keybinds for special themes
+    for _, special in ipairs(M.crayon_config.special_themes) do
+        vim.keymap.set("n", special.keybinding, function() set_theme(special.colorscheme, special.background, special.transparency, true) end)
+    end
+
+    -- Setup autocommands for filetype themes
+    for _, ft_theme in ipairs(M.crayon_config.filetype_themes) do
+        vim.api.nvim_create_autocmd({"BufEnter", "BufLeave"}, {
+            desc = "Set a specific theme for designated filetypes",
+            group = augroup,
+            pattern = ft_theme.pattern,
+            callback = function(args)
+                vim.schedule(function()
+                    if args.event == "BufEnter" then
+                        set_theme(ft_theme.colorscheme, ft_theme.background, ft_theme.transparency, false)
+                    else
+                        set_theme(M.current_theme.colorscheme, M.current_theme.background, M.current_theme.transparency, false)
+                    end
+                end)
+            end
+        })
+    end
 end
 
 
