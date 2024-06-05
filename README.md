@@ -5,6 +5,7 @@ crayons.nvim dynamically manages and applies colorschemes and theme settings. It
 - **Theme Management**: Easily switch between multiple themes with predefined variants.
 - **Custom Keybindings**: Assign custom keybindings for different themes and variants.
 - **Transparency Support**: Option to enable or disable transparency for themes.
+- **Filetype Themes**: Set specific themes for designated filetypes.
 - **Extensible**: Add more themes and configurations as needed.
 - **Persistent**: Settings are saved between sessions.
 
@@ -80,19 +81,24 @@ require("crayons").setup({
 ```
 
 ### Adding Filetype Themes
-Filetype themes allow you to specify a specific colorscheme based on file extension. This is particularly useful if you want to have a consistent theme for something like Markdown files.
+Filetype themes allow you to assign a specific colorscheme based on file extension. This is particularly useful if you want to have a consistent theme for something like Markdown files.
 ```lua
-require("crayons").setup({
-    filetype_themes = {
-        {
-            colorscheme = "gruvbox-light",  -- colorscheme name
-            background = "light",           -- "dark" or "light"
-            transparency = false,           -- true or false
-            pattern = "*.md",               -- autocmd pattern
-        },
-        -- ...
-    }
-})
+event = "VeryLazy",     -- ft is required when lazy loading with filetype_themes,
+ft = { "md" },          -- otherwise the theme might not get set
+
+config = function()
+    require("crayons").setup({
+        filetype_themes = {
+            {
+                colorscheme = "gruvbox-light",  -- colorscheme name
+                background = "light",           -- "dark" or "light"
+                transparency = false,           -- true or false
+                pattern = "*.md",               -- autocmd pattern
+            },
+            -- ...
+        }
+    })
+end
 ```
 
 ### Customizing Keybindings
@@ -100,7 +106,7 @@ Keybindings allow you to quickly switch between different theme variants. You ca
 ```lua
 require("crayons").setup({
     keybindings = {
-        standard = "<leader>tt",
+        standard = "<leader>ts",
         light    = "<leader>tl",
         dark     = "<leader>td",
         darkest  = "<leader>tD"
@@ -112,7 +118,7 @@ require("crayons").setup({
 ### Switching Themes
 You can use crayons.nvim to switch between themes and their variants through pre-configured keybindings:
 
--   **Standard Theme**: `<leader>tt#` - Switch to the standard variant of a theme, where `#` is the index number of the theme.
+-   **Standard Theme**: `<leader>ts#` - Switch to the standard variant of a theme, where `#` is the index number of the theme.
 -   **Light Theme**: `<leader>tl#` - Switch to the light variant of a theme.
 -   **Dark Theme**: `<leader>td#` - Switch to the dark variant of a theme.
 -   **Darkest Theme with Transparency**: `<leader>tD#` - Switch to the darkest variant of a theme with transparency enabled.
