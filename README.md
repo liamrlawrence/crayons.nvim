@@ -1,5 +1,5 @@
 # crayons.nvim
-crayons.nvim dynamically manages and applies colorschemes and theme settings. It provides a straightforward way to switch between various themes and configurations directly within Neovim.
+Crayons provides a straightforward way to quickly switch between your favorite themes.
 
 ## Features
 - **Theme Management**: Easily switch between multiple themes with predefined variants.
@@ -8,6 +8,14 @@ crayons.nvim dynamically manages and applies colorschemes and theme settings. It
 - **Filetype Themes**: Set specific themes for designated filetypes.
 - **Extensible**: Add more themes and configurations as needed.
 - **Persistent**: Settings are saved between sessions.
+
+## Switching Themes
+You can switch between themes and their variants through pre-configured keybindings:
+
+-   **Standard Theme**: `<leader>ts#` - Switch to the standard variant of a theme, where `#` is the theme number.
+-   **Light Theme**: `<leader>tl#` - Switch to the light variant of a theme.
+-   **Dark Theme**: `<leader>td#` - Switch to the dark variant of a theme.
+-   **Darkest Theme with Transparency**: `<leader>tdd#` - Switch to the darkest variant of a theme with transparency enabled.
 
 ## Requirements
 - Neovim 0.5+
@@ -38,6 +46,9 @@ The `crayons.nvim` setup function allows you to customize and extend the plugin 
 
 ### Adding New Themes
 You can add new themes or modify existing ones by including them in the `themes` table during setup. Each theme has several variants (standard, light, dark, darkest).
+
+Themes are set in order 1 through (1)0 across the keyboard, 11+ will be ignored.
+
 ```lua
 require("crayons").setup({
     themes = {
@@ -50,7 +61,9 @@ require("crayons").setup({
                 darkest  = "gruvbox-dark",
             }
         },
-        {   -- Theme #2
+        {}, -- Theme #2
+        {}, -- Theme #3         Use blanks to skip numbers
+        {   -- Theme #4
             name = "tokyonight",
             variants = {
                 standard = "tokyonight-storm",
@@ -65,7 +78,7 @@ require("crayons").setup({
 ```
 
 ### Adding Special Themes
-Special themes are ones that have a single variant and you want to assign unique settings, such as transparency and a specific keybindings. You can configure special themes in the `special_themes` section of the setup:
+Special themes are ones that have a single variant and you want to assign unique settings, such as transparency and a specific keybinding.
 ```lua
 require("crayons").setup({
     special_themes = {
@@ -102,26 +115,17 @@ end
 ```
 
 ### Customizing Keybindings
-Keybindings allow you to quickly switch between different theme variants. You can customize these keybindings in the `keybindings` field of the setup. Here's how to set up custom keybindings for switching themes:
+You can change the default keybinds used for switching themes.
 ```lua
 require("crayons").setup({
     keybindings = {
         standard = "<leader>ts",
         light    = "<leader>tl",
         dark     = "<leader>td",
-        darkest  = "<leader>tD"
+        darkest  = "<leader>tdd"
     }
 })
 ```
-
-## Usage
-### Switching Themes
-You can use crayons.nvim to switch between themes and their variants through pre-configured keybindings:
-
--   **Standard Theme**: `<leader>ts#` - Switch to the standard variant of a theme, where `#` is the index number of the theme.
--   **Light Theme**: `<leader>tl#` - Switch to the light variant of a theme.
--   **Dark Theme**: `<leader>td#` - Switch to the dark variant of a theme.
--   **Darkest Theme with Transparency**: `<leader>tD#` - Switch to the darkest variant of a theme with transparency enabled.
 
 ## License
 crayons.nvim is released under the MIT License.

@@ -23,7 +23,7 @@ M.crayon_config = {
         standard = "<leader>ts",
         light    = "<leader>tl",
         dark     = "<leader>td",
-        darkest  = "<leader>tD",
+        darkest  = "<leader>tdd",
     },
 
     special_themes = {
@@ -119,12 +119,15 @@ function M.setup(user_config)
 
     -- Register keybinds for standard themes
     for index, theme_info in ipairs(M.crayon_config.themes) do
-        --local name = theme_info.name
-        local themes = theme_info.variants
-        vim.keymap.set("n", M.crayon_config.keybindings.standard .. index, function() set_theme(themes.standard, "dark", false, true) end)
-        vim.keymap.set("n", M.crayon_config.keybindings.light .. index, function() set_theme(themes.light, "light", false, true) end)
-        vim.keymap.set("n", M.crayon_config.keybindings.dark .. index, function() set_theme(themes.dark, "dark", false, true) end)
-        vim.keymap.set("n", M.crayon_config.keybindings.darkest .. index, function() set_theme(themes.darkest, "dark", true, true) end)
+        local key_index = (index == 10) and 0 or index
+        if key_index < 11 then                          -- NOTE: Themes 11+ will not be set!
+            --local name = theme_info.name
+            local themes = theme_info.variants
+            vim.keymap.set("n", M.crayon_config.keybindings.standard .. key_index, function() set_theme(themes.standard, "dark", false, true) end)
+            vim.keymap.set("n", M.crayon_config.keybindings.light .. key_index, function() set_theme(themes.light, "light", false, true) end)
+            vim.keymap.set("n", M.crayon_config.keybindings.dark .. key_index, function() set_theme(themes.dark, "dark", false, true) end)
+            vim.keymap.set("n", M.crayon_config.keybindings.darkest .. key_index, function() set_theme(themes.darkest, "dark", true, true) end)
+        end
     end
 
     -- Register keybinds for special themes
@@ -134,7 +137,7 @@ function M.setup(user_config)
 
     -- Setup autocommands for filetype themes
     for _, ft_theme in ipairs(M.crayon_config.filetype_themes) do
-        vim.api.nvim_create_autocmd({"BufEnter", "BufLeave"}, {
+        vim.api.nvim_create_autocmd({ "BufEnter", "BufLeave" }, {
             desc = "Set a specific theme for designated filetypes",
             group = augroup,
             pattern = ft_theme.pattern,
