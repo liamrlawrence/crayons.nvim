@@ -13,9 +13,9 @@ Crayons provides a straightforward way to quickly switch between your favorite t
 You can switch between themes and their variants through pre-configured keybindings:
 
 -   **Standard Theme**: `<leader>ts#` - Switch to the standard variant of a theme, where `#` is the theme number.
--   **Light Theme**: `<leader>tl#` - Switch to the light variant of a theme.
 -   **Dark Theme**: `<leader>td#` - Switch to the dark variant of a theme.
 -   **Darkest Theme with Transparency**: `<leader>tdd#` - Switch to the darkest variant of a theme with transparency enabled.
+-   **Light Theme**: `<leader>tl#` - Switch to the light variant of a theme.
 
 ## Requirements
 - Neovim 0.5+
@@ -58,9 +58,9 @@ require("crayons").setup({
             name = "gruvbox",
             variants = {
                 standard = "gruvbox-medium",
-                light    = "gruvbox-light",
                 dark     = "gruvbox-dark",
                 darkest  = "gruvbox-dark",
+                light    = "gruvbox-light",
             }
         },
         {}, -- Theme #2
@@ -69,9 +69,9 @@ require("crayons").setup({
             name = "tokyonight",
             variants = {
                 standard = "tokyonight-storm",
-                light    = "tokyonight-day",
                 dark     = "tokyonight-night",
                 darkest  = "tokyonight-night",
+                light    = "tokyonight-day",
             }
         },
         -- ...
@@ -98,7 +98,7 @@ require("crayons").setup({
 ### Adding Filetype Themes
 Filetype themes assign a specific colorscheme based on either a filetype name or a filename glob pattern. Each window renders its theme independently, so splits with different filetypes will display different colorschemes simultaneously.
 
-Use `filetype` to match by Neovim filetype name, or `pattern` to match by filename glob. Do not specify both on the same entry — if a buffer matches both, the pattern takes priority and the filetype entry is ignored.
+Use `filetype` to match by Neovim filetype name, or `pattern` to match by filename glob. Both fields accept either a single string or a list of strings. Do not specify both on the same entry — if a buffer matches both, the pattern takes priority and the filetype entry is ignored.
 
 > **Note:** Transparency is not supported for filetype or pattern themes.
 
@@ -106,14 +106,24 @@ Use `filetype` to match by Neovim filetype name, or `pattern` to match by filena
 require("crayons").setup({
     filetype_themes = {
         {
-            colorscheme = "carbonfox",   -- colorscheme name
-            background = "dark",         -- "dark" or "light"
-            filetype = "fugitive",        -- matched by Neovim filetype name
+            filetype = "fugitive",        -- single filetype
+            colorscheme = "carbonfox",    -- colorscheme name
+            background = "dark",          -- "dark" or "light"
         },
         {
-            colorscheme = "dawnfox",     -- colorscheme name
-            background = "light",        -- "dark" or "light"
-            pattern = "*.h",             -- matched by filename glob
+            pattern = "*.md",             -- single glob pattern
+            colorscheme = "kanagawa",     -- colorscheme name
+            background = "dark",          -- "dark" or "light"
+        },
+        {
+            filetype = { "c", "cpp" },    -- list of filetypes
+            colorscheme = "carbonfox",    -- colorscheme name
+            background = "dark"           -- "dark" or "light"
+        },
+        {
+            pattern = { "*.h", "*.hpp" }, -- list of glob patterns
+            colorscheme = "dawnfox",      -- colorscheme name
+            background = "light",         -- "dark" or "light"
         },
         -- ...
     }
@@ -126,9 +136,9 @@ You can change the default keybinds used for switching themes.
 require("crayons").setup({
     keybindings = {
         standard = "<leader>ts",
-        light    = "<leader>tl",
         dark     = "<leader>td",
-        darkest  = "<leader>tdd"
+        darkest  = "<leader>tdd",
+        light    = "<leader>tl",
     }
 })
 ```

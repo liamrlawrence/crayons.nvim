@@ -11,9 +11,9 @@ M.crayon_config = {
             name = "built-in",
             variants = {
                 standard = "default",
-                light    = "default",
                 dark     = "default",
                 darkest  = "default",
+                light    = "default",
             }
         },
         -- Add more themes as needed
@@ -21,9 +21,9 @@ M.crayon_config = {
 
     keybindings = {
         standard = "<leader>ts",
-        light    = "<leader>tl",
         dark     = "<leader>td",
         darkest  = "<leader>tdd",
+        light    = "<leader>tl",
     },
 
     special_themes = {
@@ -37,10 +37,25 @@ M.crayon_config = {
 
     filetype_themes = {
         -- Filetype example (matched by filetype name):
-        -- { filetype = "fugitive", colorscheme = "carbonfox", background = "dark" },
+        -- {
+        --     filetype = "fugitive",
+        --     colorscheme = "carbonfox",
+        --     background = "dark"
+        -- },
         --
         -- Pattern example (matched by filename glob):
-        -- { pattern = "*.h", colorscheme = "dawnfox", background = "light" },
+        -- {
+        --     pattern = "*.h",
+        --     colorscheme = "carbonfox",
+        --     background = "dark"
+        -- },
+        --
+        -- List example (works for either filetype or pattern):
+        -- {
+        --     pattern = { "*.h", "*.hh", "*.hpp", "*.hxx" },
+        --     colorscheme = "carbonfox",
+        --     background = "dark"
+        -- },
         --
         -- NOTE: Do not specify both on the same entry - if a buffer matches
         -- both, the pattern always wins and the filetype entry is ignored.
@@ -118,9 +133,9 @@ function M.setup(user_config)
         if key_index < 11 then                          -- NOTE: Themes 11+ will not be set!
             local themes = theme_info.variants
             vim.keymap.set("n", M.crayon_config.keybindings.standard .. key_index, function() set_theme(themes.standard, "dark",  false, true) end)
-            vim.keymap.set("n", M.crayon_config.keybindings.light    .. key_index, function() set_theme(themes.light,    "light", false, true) end)
             vim.keymap.set("n", M.crayon_config.keybindings.dark     .. key_index, function() set_theme(themes.dark,     "dark",  false, true) end)
             vim.keymap.set("n", M.crayon_config.keybindings.darkest  .. key_index, function() set_theme(themes.darkest,  "dark",  true,  true) end)
+            vim.keymap.set("n", M.crayon_config.keybindings.light    .. key_index, function() set_theme(themes.light,    "light", false, true) end)
         end
     end
 
@@ -133,10 +148,16 @@ function M.setup(user_config)
     local styler_themes = {}
     for _, ft_theme in ipairs(M.crayon_config.filetype_themes) do
         if ft_theme.filetype then
-            styler_themes[ft_theme.filetype] = {
-                colorscheme = ft_theme.colorscheme,
-                background  = ft_theme.background,
-            }
+            -- Support either a string or a list of filetypes
+            local filetypes = type(ft_theme.filetype) == "table"
+                and ft_theme.filetype
+                or  { ft_theme.filetype }
+            for _, ft in ipairs(filetypes) do
+                styler_themes[ft] = {
+                    colorscheme = ft_theme.colorscheme,
+                    background  = ft_theme.background,
+                }
+            end
         end
     end
     Styler.setup({ themes = styler_themes })
@@ -148,7 +169,6 @@ function M.setup(user_config)
     for _, ft_theme in ipairs(M.crayon_config.filetype_themes) do
         if ft_theme.pattern then
             vim.api.nvim_create_autocmd({ "BufWinEnter", "BufNew" }, {
-                desc    = "Set theme based on filetype",
                 group   = pattern_group,
                 pattern = ft_theme.pattern,
                 callback = function(args)
