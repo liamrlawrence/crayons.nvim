@@ -148,12 +148,12 @@ function M.setup(user_config)
         if key_index < 11 then                          -- NOTE: Themes 11+ will not be set!
             local themes = theme_info.variants
             local kb = M.crayon_config.keybindings
-            -- Per-window switch
+            -- Window
             vim.keymap.set("n", kb.standard .. key_index, function() switch_win_theme(themes.standard, "dark")  end)
             vim.keymap.set("n", kb.dark     .. key_index, function() switch_win_theme(themes.dark,     "dark")  end)
             vim.keymap.set("n", kb.darkest  .. key_index, function() switch_win_theme(themes.darkest,  "dark")  end)
             vim.keymap.set("n", kb.light    .. key_index, function() switch_win_theme(themes.light,    "light") end)
-            -- Global switch
+            -- Global
             vim.keymap.set("n", kb.global_standard .. key_index, function() switch_global_theme(themes.standard, "dark",  false) end)
             vim.keymap.set("n", kb.global_dark     .. key_index, function() switch_global_theme(themes.dark,     "dark",  false) end)
             vim.keymap.set("n", kb.global_darkest  .. key_index, function() switch_global_theme(themes.darkest,  "dark",  true)  end)
@@ -184,10 +184,12 @@ function M.setup(user_config)
 
 
     -- Apply themes
-    local ft_group = vim.api.nvim_create_augroup("crayons-filetypes", { clear = true })
+    local theme_group = vim.api.nvim_create_augroup("crayons-theme", { clear = true })
+
+    -- NOTE: Catches case where ':set filetype=T' is manually run
     vim.api.nvim_create_autocmd("FileType", {
-        group = ft_group,
-        desc  = "Apply filetype theme to all windows showing this buffer",
+        group = theme_group,
+        desc = "Apply filetype theme to all windows showing this buffer",
         callback = function(args)
             local theme = ft_themes_map[vim.bo[args.buf].filetype]
             for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -202,36 +204,98 @@ function M.setup(user_config)
         end
     })
 
+    -- NOTE: Catches cases where FileType won't re-fire, e.g. when an already-open buffer enters a window
     vim.api.nvim_create_autocmd("BufWinEnter", {
-        group = ft_group,
-        desc  = "Apply filetype theme when a buffer enters a window",   -- NOTE: Catches cases where FileType won't re-fire, e.g. when an already-open buffer enters a window
+        group = theme_group,
+        desc = "Apply filetype theme to all windows showing this buffer",
         callback = function(args)
-            local win = vim.api.nvim_get_current_win()
-            local theme = ft_themes_map[vim.bo[args.buf].filetype]
-            if theme then
-                Styler.set_theme(win, theme)
-            else
-                Styler.clear(win)
-            end
+            local buf = args.buf
+            vim.schedule(function()
+                if not vim.api.nvim_buf_is_valid(buf) then return end
+                local theme = ft_themes_map[vim.bo[buf].filetype]
+                for _, win in ipairs(vim.api.nvim_list_wins()) do
+                    if vim.api.nvim_win_get_buf(win) == buf then
+                        if theme then
+                            vim.w[win].theme = nil
+                            Styler.set_theme(win, theme)
+                        else
+                            Styler.clear(win)
+                        end
+                    end
+                end
+            end)
         end
     })
 
-    local pattern_group = vim.api.nvim_create_augroup("crayons-patterns", { clear = true })
+    -- NOTE: Catches case where a FileType / Pattern themed buffer is split
+    vim.api.nvim_create_autocmd("WinNew", {
+        group = theme_group,
+        desc = "Apply filetype or pattern theme to a newly created window",
+        callback = function()
+            local win = vim.api.nvim_get_current_win()
+            local buf = vim.api.nvim_win_get_buf(win)
+            vim.schedule(function()
+                if not vim.api.nvim_win_is_valid(win) then return end
+                if not vim.api.nvim_buf_is_valid(buf) then return end
+
+                -- Check filetype themes first
+                local theme = ft_themes_map[vim.bo[buf].filetype]
+
+                -- Check pattern themes (pattern wins over filetype if both match)
+                local bufname = vim.api.nvim_buf_get_name(buf)
+                for _, ft_theme in ipairs(M.crayon_config.filetype_themes) do
+                    if ft_theme.pattern then
+                        local patterns = type(ft_theme.pattern) == "table"
+                            and ft_theme.pattern
+                            or  { ft_theme.pattern }
+                        for _, pat in ipairs(patterns) do
+                            if vim.fn.match(bufname, vim.fn.glob2regpat(pat)) >= 0 then
+                                theme = {
+                                    colorscheme = ft_theme.colorscheme,
+                                    background  = ft_theme.background,
+                                }
+                                break
+                            end
+                        end
+                    end
+                end
+
+                if theme then
+                    vim.w[win].theme = nil
+                    Styler.set_theme(win, theme)
+                else
+                    Styler.clear(win)
+                end
+            end)
+        end
+    })
+
+    -- NOTE: Primary handler for applying pattern themes when a matching buffer enters a window
     for _, ft_theme in ipairs(M.crayon_config.filetype_themes) do
         if ft_theme.pattern then
             vim.api.nvim_create_autocmd("BufWinEnter", {
-                desc = "Apply pattern theme to the current window when a matching buffer enters",
-                group   = pattern_group,
+                desc = "Apply pattern theme to all windows showing a matching buffer",
+                group = theme_group,
                 pattern = ft_theme.pattern,
-                callback = function()
-                    Styler.set_theme(vim.api.nvim_get_current_win(), {
-                        colorscheme = ft_theme.colorscheme,
-                        background  = ft_theme.background,
-                    })
+                callback = function(args)
+                    local buf = args.buf
+                    vim.schedule(function()
+                        if not vim.api.nvim_buf_is_valid(buf) then return end
+                        for _, win in ipairs(vim.api.nvim_list_wins()) do
+                            if vim.api.nvim_win_get_buf(win) == buf then
+                                vim.w[win].theme = nil
+                                Styler.set_theme(win, {
+                                    colorscheme = ft_theme.colorscheme,
+                                    background  = ft_theme.background,
+                                })
+                            end
+                        end
+                    end)
                 end
             })
         end
     end
+
 end
 
 

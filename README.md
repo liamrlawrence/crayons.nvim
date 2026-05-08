@@ -27,7 +27,7 @@ You can switch between themes and their variants through pre-configured keybindi
 ## Requirements
 - Neovim 0.5+
 - [cabinet.nvim](https://github.com/liamrlawrence/cabinet.nvim) for configuration management.
-- [styler.nvim](https://github.com/folke/styler.nvim) for per-window filetype themes.
+- [styler.nvim](https://github.com/folke/styler.nvim) for per-window themes.
 - The themes that you will be using.
 
 ## Installation
