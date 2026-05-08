@@ -12,10 +12,17 @@ Crayons provides a straightforward way to quickly switch between your favorite t
 ## Switching Themes
 You can switch between themes and their variants through pre-configured keybindings:
 
+### Per-window
 -   **Standard Theme**: `<leader>ts#` - Switch to the standard variant of a theme, where `#` is the theme number.
 -   **Dark Theme**: `<leader>td#` - Switch to the dark variant of a theme.
 -   **Darkest Theme with Transparency**: `<leader>tdd#` - Switch to the darkest variant of a theme with transparency enabled.
 -   **Light Theme**: `<leader>tl#` - Switch to the light variant of a theme.
+
+### Global
+-   **Standard Theme**: `<leader>tgs#` - Switch the global baseline to the standard variant, where `#` is the theme number.
+-   **Dark Theme**: `<leader>tgd#` - Switch the global baseline to the dark variant.
+-   **Darkest Theme with Transparency**: `<leader>tgdd#` - Switch the global baseline to the darkest variant with transparency enabled.
+-   **Light Theme**: `<leader>tgl#` - Switch the global baseline to the light variant.
 
 ## Requirements
 - Neovim 0.5+
@@ -135,10 +142,16 @@ You can change the default keybinds used for switching themes.
 ```lua
 require("crayons").setup({
     keybindings = {
-        standard = "<leader>ts",
-        dark     = "<leader>td",
-        darkest  = "<leader>tdd",
-        light    = "<leader>tl",
+        -- window
+        standard        = "<leader>ts",
+        dark            = "<leader>td",
+        darkest         = "<leader>tdd",
+        light           = "<leader>tl",
+        -- global
+        global_standard = "<leader>tgs",
+        global_dark     = "<leader>tgd",
+        global_darkest  = "<leader>tgdd",
+        global_light    = "<leader>tgl",
     }
 })
 ```
