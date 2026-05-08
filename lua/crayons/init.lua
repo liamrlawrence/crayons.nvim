@@ -1,5 +1,5 @@
-local augroup = vim.api.nvim_create_augroup("crayons-group", {})
 local Config = require("cabinet").config_manager
+local Styler = require("styler")
 
 local M = {}
 
@@ -36,12 +36,14 @@ M.crayon_config = {
     },
 
     filetype_themes = {
-        -- Example: {
-        --     colorscheme = "gruvbox",
-        --     background = "light",
-        --     transparency = false,
-        --     pattern = "*.md",
-        -- },
+        -- Filetype example (matched by filetype name):
+        -- { filetype = "fugitive", colorscheme = "carbonfox", background = "dark" },
+        --
+        -- Pattern example (matched by filename glob):
+        -- { pattern = "*.h", colorscheme = "dawnfox", background = "light" },
+        --
+        -- NOTE: Do not specify both on the same entry - if a buffer matches
+        -- both, the pattern always wins and the filetype entry is ignored.
     },
 }
 
@@ -50,11 +52,10 @@ local function set_theme(theme_colorscheme, theme_background, theme_transparency
     vim.o.background = theme_background
     vim.cmd.colorscheme(theme_colorscheme)
     if theme_transparency then
-        vim.api.nvim_set_hl(0, "LineNr",        { bg = "none" })
-        vim.api.nvim_set_hl(0, "SignColumn",    { bg = "none" })
-        vim.api.nvim_set_hl(0, "Normal",        { bg = "none" })
-        vim.api.nvim_set_hl(0, "NormalFloat",   { bg = "none" })
-        vim.api.nvim_set_hl(0, "Normal",        { bg = "none" })
+        vim.api.nvim_set_hl(0, "LineNr",      { bg = "none" })
+        vim.api.nvim_set_hl(0, "SignColumn",  { bg = "none" })
+        vim.api.nvim_set_hl(0, "Normal",      { bg = "none" })
+        vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
     end
 
     -- Highlight current parameter when looking at a Signature
@@ -69,8 +70,8 @@ local function set_theme(theme_colorscheme, theme_background, theme_transparency
 
     if save_theme then
         M.current_theme = {
-            colorscheme = theme_colorscheme,
-            background = theme_background,
+            colorscheme  = theme_colorscheme,
+            background   = theme_background,
             transparency = theme_transparency
         }
         Config.save("theme_config", M.current_theme)
@@ -79,26 +80,20 @@ end
 
 
 function M.load_config()
-    local theme_colorscheme, theme_background, theme_transparency
     local loaded_config = Config.load("theme_config")
     if loaded_config then
-        theme_colorscheme = loaded_config.colorscheme
-        theme_background = loaded_config.background
-        theme_transparency = loaded_config.transparency
+        return {
+            colorscheme  = loaded_config.colorscheme,
+            background   = loaded_config.background,
+            transparency = loaded_config.transparency,
+        }
     else
-        -- Fallback if config file doesn't exist
-        theme_colorscheme = M.crayon_config.themes[1]["variants"]["standard"]
-        theme_background = "dark"
-        theme_transparency = false
+        return {
+            colorscheme  = M.crayon_config.themes[1].variants.standard,
+            background   = "dark",
+            transparency = false,
+        }
     end
-
-    local config = {
-        colorscheme = theme_colorscheme,
-        background = theme_background,
-        transparency = theme_transparency,
-    }
-
-    return config
 end
 
 
@@ -113,7 +108,7 @@ function M.setup(user_config)
         M.crayon_config = vim.tbl_deep_extend("force", M.crayon_config, user_config)
     end
 
-    -- Load saved configuration
+    -- Load and apply saved global theme
     local config = M.load_config()
     set_theme(config.colorscheme, config.background, config.transparency, true)
 
@@ -121,12 +116,11 @@ function M.setup(user_config)
     for index, theme_info in ipairs(M.crayon_config.themes) do
         local key_index = (index == 10) and 0 or index
         if key_index < 11 then                          -- NOTE: Themes 11+ will not be set!
-            --local name = theme_info.name
             local themes = theme_info.variants
-            vim.keymap.set("n", M.crayon_config.keybindings.standard .. key_index, function() set_theme(themes.standard, "dark", false, true) end)
-            vim.keymap.set("n", M.crayon_config.keybindings.light .. key_index, function() set_theme(themes.light, "light", false, true) end)
-            vim.keymap.set("n", M.crayon_config.keybindings.dark .. key_index, function() set_theme(themes.dark, "dark", false, true) end)
-            vim.keymap.set("n", M.crayon_config.keybindings.darkest .. key_index, function() set_theme(themes.darkest, "dark", true, true) end)
+            vim.keymap.set("n", M.crayon_config.keybindings.standard .. key_index, function() set_theme(themes.standard, "dark",  false, true) end)
+            vim.keymap.set("n", M.crayon_config.keybindings.light    .. key_index, function() set_theme(themes.light,    "light", false, true) end)
+            vim.keymap.set("n", M.crayon_config.keybindings.dark     .. key_index, function() set_theme(themes.dark,     "dark",  false, true) end)
+            vim.keymap.set("n", M.crayon_config.keybindings.darkest  .. key_index, function() set_theme(themes.darkest,  "dark",  true,  true) end)
         end
     end
 
@@ -135,22 +129,37 @@ function M.setup(user_config)
         vim.keymap.set("n", special.keybinding, function() set_theme(special.colorscheme, special.background, special.transparency, true) end)
     end
 
-    -- Setup autocommands for filetype themes
+    -- Build styler themes table from filetype entries
+    local styler_themes = {}
     for _, ft_theme in ipairs(M.crayon_config.filetype_themes) do
-        vim.api.nvim_create_autocmd({ "BufEnter", "BufLeave" }, {
-            desc = "Set a specific theme for designated filetypes",
-            group = augroup,
-            pattern = ft_theme.pattern,
-            callback = function(args)
-                vim.schedule(function()
-                    if args.event == "BufEnter" then
-                        set_theme(ft_theme.colorscheme, ft_theme.background, ft_theme.transparency, false)
-                    else
-                        set_theme(M.current_theme.colorscheme, M.current_theme.background, M.current_theme.transparency, false)
-                    end
-                end)
-            end
-        })
+        if ft_theme.filetype then
+            styler_themes[ft_theme.filetype] = {
+                colorscheme = ft_theme.colorscheme,
+                background  = ft_theme.background,
+            }
+        end
+    end
+    Styler.setup({ themes = styler_themes })
+
+    -- Register pattern-based themes via buf-level overrides.
+    -- Styler.bufs takes priority over Styler.themes, so pattern always
+    -- wins when a buffer matches both a pattern and a filetype entry.
+    local pattern_group = vim.api.nvim_create_augroup("crayons-patterns", { clear = true })
+    for _, ft_theme in ipairs(M.crayon_config.filetype_themes) do
+        if ft_theme.pattern then
+            vim.api.nvim_create_autocmd({ "BufWinEnter", "BufNew" }, {
+                desc    = "Set theme based on filetype",
+                group   = pattern_group,
+                pattern = ft_theme.pattern,
+                callback = function(args)
+                    Styler.bufs[args.buf] = {
+                        colorscheme = ft_theme.colorscheme,
+                        background  = ft_theme.background,
+                    }
+                    Styler.update({ buf = args.buf })
+                end
+            })
+        end
     end
 end
 

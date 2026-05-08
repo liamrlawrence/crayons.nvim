@@ -5,7 +5,7 @@ Crayons provides a straightforward way to quickly switch between your favorite t
 - **Theme Management**: Easily switch between multiple themes with predefined variants.
 - **Custom Keybindings**: Assign custom keybindings for different themes and variants.
 - **Transparency Support**: Option to enable or disable transparency for themes.
-- **Filetype Themes**: Set specific themes for designated filetypes.
+- **Filetype Themes**: Set specific themes for designated filetypes or file patterns, rendered per-window simultaneously.
 - **Extensible**: Add more themes and configurations as needed.
 - **Persistent**: Settings are saved between sessions.
 
@@ -20,6 +20,7 @@ You can switch between themes and their variants through pre-configured keybindi
 ## Requirements
 - Neovim 0.5+
 - [cabinet.nvim](https://github.com/liamrlawrence/cabinet.nvim) for configuration management.
+- [styler.nvim](https://github.com/folke/styler.nvim) for per-window filetype themes.
 - The themes that you will be using.
 
 ## Installation
@@ -31,6 +32,7 @@ return {
     "liamrlawrence/crayons.nvim",
     dependencies = {
         "liamrlawrence/cabinet.nvim",
+        "folke/styler.nvim",
         -- Themes go here
     },
 
@@ -94,24 +96,28 @@ require("crayons").setup({
 ```
 
 ### Adding Filetype Themes
-Filetype themes allow you to assign a specific colorscheme based on file extension. This is particularly useful if you want to have a consistent theme for something like Markdown files.
-```lua
-event = "VeryLazy",     -- ft is required when lazy loading with filetype_themes,
-ft = { "md" },          -- otherwise the theme might not get set
+Filetype themes assign a specific colorscheme based on either a filetype name or a filename glob pattern. Each window renders its theme independently, so splits with different filetypes will display different colorschemes simultaneously.
 
-config = function()
-    require("crayons").setup({
-        filetype_themes = {
-            {
-                colorscheme = "gruvbox-light",  -- colorscheme name
-                background = "light",           -- "dark" or "light"
-                transparency = false,           -- true or false
-                pattern = "*.md",               -- autocmd pattern
-            },
-            -- ...
-        }
-    })
-end
+Use `filetype` to match by Neovim filetype name, or `pattern` to match by filename glob. Do not specify both on the same entry — if a buffer matches both, the pattern takes priority and the filetype entry is ignored.
+
+> **Note:** Transparency is not supported for filetype or pattern themes.
+
+```lua
+require("crayons").setup({
+    filetype_themes = {
+        {
+            colorscheme = "carbonfox",   -- colorscheme name
+            background = "dark",         -- "dark" or "light"
+            filetype = "fugitive",        -- matched by Neovim filetype name
+        },
+        {
+            colorscheme = "dawnfox",     -- colorscheme name
+            background = "light",        -- "dark" or "light"
+            pattern = "*.h",             -- matched by filename glob
+        },
+        -- ...
+    }
+})
 ```
 
 ### Customizing Keybindings
