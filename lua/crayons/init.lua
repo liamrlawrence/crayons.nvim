@@ -94,6 +94,10 @@ end
 -- unaffected: filetype windows keep their namespaces, unthemed windows
 -- pick up the new global via namespace 0.
 local function switch_global_theme(colorscheme, background, transparency)
+    if not colorscheme then
+        vim.notify("crayons: no colorscheme assigned to this key", vim.log.levels.WARN)
+        return
+    end
     set_global_theme(colorscheme, background, transparency)
 
     Styler.clear(vim.api.nvim_get_current_win())
@@ -110,6 +114,10 @@ end
 -- Theme switch that applies only to the current window via a styler namespace.
 -- Does not touch the global baseline or other windows.
 local function switch_win_theme(colorscheme, background)
+    if not colorscheme then
+        vim.notify("crayons: no colorscheme assigned to this key", vim.log.levels.WARN)
+        return
+    end
     local win = vim.api.nvim_get_current_win()
     Styler.set_theme(win, { colorscheme = colorscheme, background = background })
 end
@@ -153,7 +161,7 @@ function M.setup(user_config)
     for index, theme_info in ipairs(M.crayon_config.themes) do
         local key_index = (index == 10) and 0 or index
         if key_index < 11 then                          -- NOTE: Themes 11+ will not be set!
-            local themes = theme_info.variants
+            local themes = theme_info.variants or {}
             local kb = M.crayon_config.keybindings
             -- Window
             vim.keymap.set("n", kb.standard .. key_index, function() switch_win_theme(themes.standard, "dark")  end)
