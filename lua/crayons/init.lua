@@ -72,7 +72,14 @@ M.crayon_config = {
 -- Global theme application, used on startup and when switching themes.
 local function set_global_theme(colorscheme, background, transparency)
     vim.o.background = background
-    vim.cmd.colorscheme(colorscheme)
+    local ok = pcall(vim.cmd.colorscheme, colorscheme)
+    if not ok then
+        vim.notify(
+            string.format("crayons: colorscheme '%s' not found, falling back to default", colorscheme),
+            vim.log.levels.WARN
+        )
+        vim.cmd.colorscheme("default")
+    end
     if transparency then
         vim.api.nvim_set_hl(0, "LineNr",      { bg = "none" })
         vim.api.nvim_set_hl(0, "SignColumn",  { bg = "none" })
