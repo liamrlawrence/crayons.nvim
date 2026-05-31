@@ -56,32 +56,45 @@ The `crayons.nvim` setup function allows you to customize and extend the plugin 
 ### Adding New Themes
 You can add new themes or modify existing ones by including them in the `themes` table during setup. Each theme has several variants (standard, light, dark, darkest).
 
-Themes are set in order 1 through (1)0 across the keyboard, 11+ will be ignored.
+Themes are set in order 1 through (1)0 across the keyboard (11+ will be ignored).
 
 ```lua
 require("crayons").setup({
     themes = {
-        {   -- Theme #1
-            name = "gruvbox",
+        {   -- 1
+            name = "kanagawa",
             variants = {
-                standard = "gruvbox-medium",
-                dark     = "gruvbox-dark",
-                darkest  = "gruvbox-dark",
-                light    = "gruvbox-light",
+                standard = "kanagawa-wave",
+                dark     = "kanagawa-dragon",
+                darkest  = "kanagawa-wave",
+                light    = "kanagawa-lotus",
             }
         },
-        {}, -- Theme #2
-        {}, -- Theme #3         Use blanks to skip numbers
-        {   -- Theme #4
+        {   -- 2
             name = "tokyonight",
             variants = {
-                standard = "tokyonight-storm",
+                standard = "tokyonight-moon",
                 dark     = "tokyonight-night",
                 darkest  = "tokyonight-night",
                 light    = "tokyonight-day",
             }
         },
-        -- ...
+        {}, -- 3         Use blanks to skip numbers
+        {}, -- 4
+        {}, -- 5
+        {}, -- 6
+        {}, -- 7
+        {}, -- 8
+        {}, -- 9
+        {   -- 10
+            name = "gruvbox",
+                variants = {
+                    standard = "gruvbox-soft",
+                    dark     = "gruvbox-medium",
+                    darkest  = "gruvbox-hard",
+                    light    = "gruvbox-light",
+                 }
+        },
     }
 })
 ```
@@ -112,29 +125,71 @@ Use `filetype` to match by Neovim filetype name, or `pattern` to match by filena
 ```lua
 require("crayons").setup({
     filetype_themes = {
+        -- Git
         {
-            filetype = "fugitive",        -- single filetype
-            colorscheme = "carbonfox",    -- colorscheme name
-            background = "dark",          -- "dark" or "light"
+            filetype = "fugitive",                -- single filetype
+            colorscheme = "carbonfox",            -- colorscheme name
+            background = "dark",                  -- "dark" or "light"
+        },
+
+        -- Markdown
+        {
+            pattern = "*.md",                     -- single glob pattern
+            colorscheme = "tokyonight-moon",      -- colorscheme name
+            background = "dark",                  -- "dark" or "light"
+        },
+
+        -- C/C++
+        {
+            filetype = { "c", "cpp" },            -- list of filetypes
+            colorscheme = "kanagawa-wave",        -- colorscheme name
+            background = "dark"                   -- "dark" or "light"
         },
         {
-            pattern = "*.md",             -- single glob pattern
-            colorscheme = "kanagawa",     -- colorscheme name
-            background = "dark",          -- "dark" or "light"
-        },
-        {
-            filetype = { "c", "cpp" },    -- list of filetypes
-            colorscheme = "carbonfox",    -- colorscheme name
-            background = "dark"           -- "dark" or "light"
-        },
-        {
-            pattern = { "*.h", "*.hpp" }, -- list of glob patterns
-            colorscheme = "dawnfox",      -- colorscheme name
-            background = "light",         -- "dark" or "light"
+            pattern = { "*.h", "*.hh", "*.hpp" }, -- list of glob patterns
+            colorscheme = "kanagawa-dragon",      -- colorscheme name
+            background = "dark",                  -- "dark" or "light"
         },
         -- ...
     }
 })
+```
+
+### Configuring / setting up themes
+You can configure theme-specific settings above crayon's `setup()` function.
+
+```lua
+return {
+    "liamrlawrence/crayons.nvim", dependencies = {
+        "liamrlawrence/cabinet.nvim",
+        "folke/styler.nvim",
+        --
+        "rebelot/kanagawa.nvim",
+        "folke/tokyonight.nvim",
+    },
+
+    config = function()
+        -- Theme setup
+        require("kanagawa").setup({
+            overrides = function(colors)
+                local theme = colors.theme
+                return {
+                    EndOfBuffer = { fg = theme.ui.nontext },
+                }
+            end,
+        })
+
+        require("tokyonight").setup({
+            on_highlights = function(highlights, colors)
+                highlights.EndOfBuffer = { fg = colors.dark3 }
+            end,
+        })
+
+
+        -- Plugin setup
+        require("crayons").setup({
+            themes = {
+                -- ...
 ```
 
 ### Customizing Keybindings
