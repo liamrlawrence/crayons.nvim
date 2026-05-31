@@ -15,13 +15,13 @@ You can switch between themes and their variants through pre-configured keybindi
 ### Per-window
 -   **Standard Theme**: `<leader>ts#` - Switch to the standard variant of a theme, where `#` is the theme number.
 -   **Dark Theme**: `<leader>td#` - Switch to the dark variant of a theme.
--   **Darkest Theme with Transparency**: `<leader>tdd#` - Switch to the darkest variant of a theme with transparency enabled.
+-   **Darkest Theme**: `<leader>tdd#` - Switch to the darkest variant of a theme.
 -   **Light Theme**: `<leader>tl#` - Switch to the light variant of a theme.
 
 ### Global
 -   **Standard Theme**: `<leader>tgs#` - Switch the global baseline to the standard variant, where `#` is the theme number.
 -   **Dark Theme**: `<leader>tgd#` - Switch the global baseline to the dark variant.
--   **Darkest Theme with Transparency**: `<leader>tgdd#` - Switch the global baseline to the darkest variant with transparency enabled.
+-   **Darkest Theme**: `<leader>tgdd#` - Switch the global baseline to the darkest variant.
 -   **Light Theme**: `<leader>tgl#` - Switch the global baseline to the light variant.
 
 ## Requirements
@@ -66,7 +66,7 @@ require("crayons").setup({
             variants = {
                 standard = "kanagawa-wave",
                 dark     = "kanagawa-dragon",
-                darkest  = "kanagawa-wave",
+                darkest  = "kanagawa-dragon",
                 light    = "kanagawa-lotus",
             }
         },
@@ -74,7 +74,7 @@ require("crayons").setup({
             name = "tokyonight",
             variants = {
                 standard = "tokyonight-moon",
-                dark     = "tokyonight-night",
+                dark     = "tokyonight-storm",
                 darkest  = "tokyonight-night",
                 light    = "tokyonight-day",
             }
@@ -91,7 +91,7 @@ require("crayons").setup({
                 variants = {
                     standard = "gruvbox-soft",
                     dark     = "gruvbox-medium",
-                    darkest  = "gruvbox-hard",
+                    darkest  = { "gruvbox-hard", transparent = true },
                     light    = "gruvbox-light",
                  }
         },
@@ -107,7 +107,7 @@ require("crayons").setup({
         {
             colorscheme = "vscode",      -- colorscheme name
             background = "dark",         -- "dark" or "light"
-            transparency = true,         -- true or false
+            transparent = true,          -- true or false
             keybinding = "<leader>ttv",  -- custom binding
         },
         -- ...
@@ -160,7 +160,8 @@ You can configure theme-specific settings above crayon's `setup()` function.
 
 ```lua
 return {
-    "liamrlawrence/crayons.nvim", dependencies = {
+    "liamrlawrence/crayons.nvim",
+    dependencies = {
         "liamrlawrence/cabinet.nvim",
         "folke/styler.nvim",
         --

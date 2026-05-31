@@ -36,7 +36,7 @@ M.crayon_config = {
         -- Example: {
         --     colorscheme = "vscode",
         --     background = "dark",
-        --     transparency = false,
+        --     transparent = false,
         --     keybinding = "<leader>ttv",
         -- },
     },
@@ -69,8 +69,20 @@ M.crayon_config = {
 }
 
 
+-- Normalize a variant value into { colorscheme, transparent }.
+-- Accepts either a plain string or a table of the form { "name", transparent = true }.
+local function resolve_variant(v)
+    if type(v) == "string" then
+        return { colorscheme = v, transparent = false }
+    elseif type(v) == "table" then
+        return { colorscheme = v[1], transparent = v.transparent == true }
+    end
+    return { colorscheme = nil, transparent = false }
+end
+
+
 -- Global theme application, used on startup and when switching themes.
-local function set_global_theme(colorscheme, background, transparency)
+local function set_global_theme(colorscheme, background, transparent)
     vim.o.background = background
     local ok = pcall(vim.cmd.colorscheme, colorscheme)
     if not ok then
@@ -80,7 +92,7 @@ local function set_global_theme(colorscheme, background, transparency)
         )
         vim.cmd.colorscheme("default")
     end
-    if transparency then
+    if transparent then
         vim.api.nvim_set_hl(0, "LineNr",      { bg = "none" })
         vim.api.nvim_set_hl(0, "SignColumn",  { bg = "none" })
         vim.api.nvim_set_hl(0, "Normal",      { bg = "none" })
@@ -93,19 +105,19 @@ end
 -- window's styler namespace so it shows the new theme. Other windows are
 -- unaffected: filetype windows keep their namespaces, unthemed windows
 -- pick up the new global via namespace 0.
-local function switch_global_theme(colorscheme, background, transparency)
+local function switch_global_theme(colorscheme, background, transparent)
     if not colorscheme then
         vim.notify("crayons: no colorscheme assigned to this key", vim.log.levels.WARN)
         return
     end
-    set_global_theme(colorscheme, background, transparency)
+    set_global_theme(colorscheme, background, transparent)
 
     Styler.clear(vim.api.nvim_get_current_win())
 
     M.current_theme = {
-        colorscheme  = colorscheme,
-        background   = background,
-        transparency = transparency,
+        colorscheme = colorscheme,
+        background  = background,
+        transparent = transparent,
     }
     Config.save("theme_config", M.current_theme)
 end
@@ -113,10 +125,14 @@ end
 
 -- Theme switch that applies only to the current window via a styler namespace.
 -- Does not touch the global baseline or other windows.
-local function switch_win_theme(colorscheme, background)
+-- NOTE: transparency is not supported for per-window themes
+local function switch_win_theme(colorscheme, background, transparent)
     if not colorscheme then
         vim.notify("crayons: no colorscheme assigned to this key", vim.log.levels.WARN)
         return
+    end
+    if transparent then
+        vim.notify("crayons: per-window transparency is not supported; use the global keybind instead", vim.log.levels.WARN)
     end
     local win = vim.api.nvim_get_current_win()
     Styler.set_theme(win, { colorscheme = colorscheme, background = background })
@@ -127,15 +143,15 @@ function M.load_config()
     local loaded_config = Config.load("theme_config")
     if loaded_config then
         return {
-            colorscheme  = loaded_config.colorscheme,
-            background   = loaded_config.background,
-            transparency = loaded_config.transparency,
+            colorscheme = loaded_config.colorscheme,
+            background  = loaded_config.background,
+            transparent = loaded_config.transparent,
         }
     else
         return {
-            colorscheme  = M.crayon_config.themes[1].variants.standard,
-            background   = "dark",
-            transparency = false,
+            colorscheme = M.crayon_config.themes[1].variants.standard,
+            background  = "dark",
+            transparent = false,
         }
     end
 end
@@ -154,31 +170,37 @@ function M.setup(user_config)
 
     -- Load and apply saved global theme
     local config = M.load_config()
-    set_global_theme(config.colorscheme, config.background, config.transparency)
+    set_global_theme(config.colorscheme, config.background, config.transparent)
     M.current_theme = config
 
     -- Register keybinds for standard themes
     for index, theme_info in ipairs(M.crayon_config.themes) do
         local key_index = (index == 10) and 0 or index
         if key_index < 11 then                          -- NOTE: Themes 11+ will not be set!
-            local themes = theme_info.variants or {}
+            local variants = theme_info.variants or {}
             local kb = M.crayon_config.keybindings
+
+            local standard = resolve_variant(variants.standard)
+            local dark     = resolve_variant(variants.dark)
+            local darkest  = resolve_variant(variants.darkest)
+            local light    = resolve_variant(variants.light)
+
             -- Window
-            vim.keymap.set("n", kb.standard .. key_index, function() switch_win_theme(themes.standard, "dark")  end)
-            vim.keymap.set("n", kb.dark     .. key_index, function() switch_win_theme(themes.dark,     "dark")  end)
-            vim.keymap.set("n", kb.darkest  .. key_index, function() switch_win_theme(themes.darkest,  "dark")  end)
-            vim.keymap.set("n", kb.light    .. key_index, function() switch_win_theme(themes.light,    "light") end)
+            vim.keymap.set("n", kb.standard .. key_index, function() switch_win_theme(standard.colorscheme, "dark",  standard.transparent) end)
+            vim.keymap.set("n", kb.dark     .. key_index, function() switch_win_theme(dark.colorscheme,     "dark",  dark.transparent)     end)
+            vim.keymap.set("n", kb.darkest  .. key_index, function() switch_win_theme(darkest.colorscheme,  "dark",  darkest.transparent)  end)
+            vim.keymap.set("n", kb.light    .. key_index, function() switch_win_theme(light.colorscheme,    "light", light.transparent)    end)
             -- Global
-            vim.keymap.set("n", kb.global_standard .. key_index, function() switch_global_theme(themes.standard, "dark",  false) end)
-            vim.keymap.set("n", kb.global_dark     .. key_index, function() switch_global_theme(themes.dark,     "dark",  false) end)
-            vim.keymap.set("n", kb.global_darkest  .. key_index, function() switch_global_theme(themes.darkest,  "dark",  true)  end)
-            vim.keymap.set("n", kb.global_light    .. key_index, function() switch_global_theme(themes.light,    "light", false) end)
+            vim.keymap.set("n", kb.global_standard .. key_index, function() switch_global_theme(standard.colorscheme, "dark",  standard.transparent) end)
+            vim.keymap.set("n", kb.global_dark     .. key_index, function() switch_global_theme(dark.colorscheme,     "dark",  dark.transparent)     end)
+            vim.keymap.set("n", kb.global_darkest  .. key_index, function() switch_global_theme(darkest.colorscheme,  "dark",  darkest.transparent)  end)
+            vim.keymap.set("n", kb.global_light    .. key_index, function() switch_global_theme(light.colorscheme,    "light", light.transparent)    end)
         end
     end
 
     -- Register keybinds for special themes
     for _, special in ipairs(M.crayon_config.special_themes) do
-        vim.keymap.set("n", special.keybinding, function() switch_global_theme(special.colorscheme, special.background, special.transparency) end)
+        vim.keymap.set("n", special.keybinding, function() switch_global_theme(special.colorscheme, special.background, special.transparent == true) end)
     end
 
     -- Build a filetype -> theme lookup from all filetype entries
