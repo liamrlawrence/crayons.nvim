@@ -45,7 +45,7 @@ return {
 
     config = function()
         require("crayons").setup()
-    end
+    end,
 }
 ```
 
