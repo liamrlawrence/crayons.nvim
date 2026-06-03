@@ -87,8 +87,9 @@ local function set_global_theme(colorscheme, background, transparent)
     local ok = pcall(vim.cmd.colorscheme, colorscheme)
     if not ok then
         vim.notify(
-            string.format("crayons: colorscheme '%s' not found, falling back to default", colorscheme),
-            vim.log.levels.WARN
+            string.format("Colorscheme '%s' not found, falling back to default", colorscheme),
+            vim.log.levels.WARN,
+            { title = "crayons.nvim" }
         )
         vim.cmd.colorscheme("default")
     end
@@ -107,7 +108,7 @@ end
 -- pick up the new global via namespace 0.
 local function switch_global_theme(colorscheme, background, transparent)
     if not colorscheme then
-        vim.notify("crayons: no colorscheme assigned to this key", vim.log.levels.WARN)
+        vim.notify("No colorscheme assigned to this key", vim.log.levels.WARN, { title = "crayons.nvim" })
         return
     end
     set_global_theme(colorscheme, background, transparent)
@@ -128,11 +129,11 @@ end
 -- NOTE: transparency is not supported for per-window themes
 local function switch_win_theme(colorscheme, background, transparent)
     if not colorscheme then
-        vim.notify("crayons: no colorscheme assigned to this key", vim.log.levels.WARN)
+        vim.notify("No colorscheme assigned to this key", vim.log.levels.WARN, { title = "crayons.nvim" })
         return
     end
     if transparent then
-        vim.notify("crayons: per-window transparency is not supported; use the global keybind instead", vim.log.levels.WARN)
+        vim.notify("Per-window transparency is not supported; use the global keybind instead", vim.log.levels.WARN, { title = "crayons.nvim" })
     end
     local win = vim.api.nvim_get_current_win()
     Styler.set_theme(win, { colorscheme = colorscheme, background = background })
@@ -186,15 +187,15 @@ function M.setup(user_config)
             local light    = resolve_variant(variants.light)
 
             -- Window
-            vim.keymap.set("n", kb.standard .. key_index, function() switch_win_theme(standard.colorscheme, "dark",  standard.transparent) end)
-            vim.keymap.set("n", kb.dark     .. key_index, function() switch_win_theme(dark.colorscheme,     "dark",  dark.transparent)     end)
-            vim.keymap.set("n", kb.darkest  .. key_index, function() switch_win_theme(darkest.colorscheme,  "dark",  darkest.transparent)  end)
-            vim.keymap.set("n", kb.light    .. key_index, function() switch_win_theme(light.colorscheme,    "light", light.transparent)    end)
+            vim.keymap.set("n", kb.standard .. key_index, function() switch_win_theme(standard.colorscheme, "dark",  standard.transparent) end, { desc = "Win set theme standard " .. index })
+            vim.keymap.set("n", kb.dark     .. key_index, function() switch_win_theme(dark.colorscheme,     "dark",  dark.transparent)     end, { desc = "Win set theme dark " .. index })
+            vim.keymap.set("n", kb.darkest  .. key_index, function() switch_win_theme(darkest.colorscheme,  "dark",  darkest.transparent)  end, { desc = "Win set theme darkest " .. index })
+            vim.keymap.set("n", kb.light    .. key_index, function() switch_win_theme(light.colorscheme,    "light", light.transparent)    end, { desc = "Win set theme light " .. index })
             -- Global
-            vim.keymap.set("n", kb.global_standard .. key_index, function() switch_global_theme(standard.colorscheme, "dark",  standard.transparent) end)
-            vim.keymap.set("n", kb.global_dark     .. key_index, function() switch_global_theme(dark.colorscheme,     "dark",  dark.transparent)     end)
-            vim.keymap.set("n", kb.global_darkest  .. key_index, function() switch_global_theme(darkest.colorscheme,  "dark",  darkest.transparent)  end)
-            vim.keymap.set("n", kb.global_light    .. key_index, function() switch_global_theme(light.colorscheme,    "light", light.transparent)    end)
+            vim.keymap.set("n", kb.global_standard .. key_index, function() switch_global_theme(standard.colorscheme, "dark",  standard.transparent) end, { desc = "Global set theme standard " .. index })
+            vim.keymap.set("n", kb.global_dark     .. key_index, function() switch_global_theme(dark.colorscheme,     "dark",  dark.transparent)     end, { desc = "Global set theme dark " .. index })
+            vim.keymap.set("n", kb.global_darkest  .. key_index, function() switch_global_theme(darkest.colorscheme,  "dark",  darkest.transparent)  end, { desc = "Global set theme darkest " .. index })
+            vim.keymap.set("n", kb.global_light    .. key_index, function() switch_global_theme(light.colorscheme,    "light", light.transparent)    end, { desc = "Global set theme light " .. index })
         end
     end
 
