@@ -1,7 +1,9 @@
 # crayons.nvim
 Crayons provides a straightforward way to quickly switch between your favorite themes.
 
+
 ## Features
+
 - **Theme Management**: Easily switch between multiple themes with predefined variants.
 - **Custom Keybindings**: Assign custom keybindings for different themes and variants.
 - **Transparency Support**: Option to enable or disable transparency for themes.
@@ -9,28 +11,38 @@ Crayons provides a straightforward way to quickly switch between your favorite t
 - **Extensible**: Add more themes and configurations as needed.
 - **Persistent**: Settings are saved between sessions.
 
+
 ## Switching Themes
+
 You can switch between themes and their variants through pre-configured keybindings:
 
+
 ### Per-window
+
 -   **Standard Theme**: `<leader>ts#` - Switch to the standard variant of a theme, where `#` is the theme number.
 -   **Dark Theme**: `<leader>td#` - Switch to the dark variant of a theme.
 -   **Darkest Theme**: `<leader>tdd#` - Switch to the darkest variant of a theme.
 -   **Light Theme**: `<leader>tl#` - Switch to the light variant of a theme.
 
+
 ### Global
+
 -   **Standard Theme**: `<leader>tgs#` - Switch the global baseline to the standard variant, where `#` is the theme number.
 -   **Dark Theme**: `<leader>tgd#` - Switch the global baseline to the dark variant.
 -   **Darkest Theme**: `<leader>tgdd#` - Switch the global baseline to the darkest variant.
 -   **Light Theme**: `<leader>tgl#` - Switch the global baseline to the light variant.
 
+
 ## Requirements
+
 - Neovim 0.5+
 - [cabinet.nvim](https://github.com/liamrlawrence/cabinet.nvim) for configuration management.
 - [styler.nvim](https://github.com/folke/styler.nvim) for per-window themes.
 - The themes that you will be using.
 
+
 ## Installation
+
 Use your preferred package manager to install crayons:
 
 [lazy.nvim](https://github.com/folke/lazy.nvim)
@@ -51,9 +63,12 @@ return {
 
 
 ## Configuration
+
 The `crayons.nvim` setup function allows you to customize and extend the plugin according to your needs. Below are the configuration options available:
 
+
 ### Adding New Themes
+
 You can add new themes or modify existing ones by including them in the `themes` table during setup. Each theme has several variants (standard, light, dark, darkest).
 
 Themes are set in order 1 through (1)0 across the keyboard (11+ will be ignored).
@@ -99,7 +114,9 @@ require("crayons").setup({
 })
 ```
 
+
 ### Adding Special Themes
+
 Special themes are ones that have a single variant and you want to assign unique settings, such as transparency and a specific keybinding.
 ```lua
 require("crayons").setup({
@@ -115,7 +132,9 @@ require("crayons").setup({
 })
 ```
 
+
 ### Adding Filetype Themes
+
 Filetype themes assign a specific colorscheme based on either a filetype name or a filename glob pattern. Each window renders its theme independently, so splits with different filetypes will display different colorschemes simultaneously.
 
 Use `filetype` to match by Neovim filetype name, or `pattern` to match by filename glob. Both fields accept either a single string or a list of strings. Do not specify both on the same entry — if a buffer matches both, the pattern takes priority and the filetype entry is ignored.
@@ -155,7 +174,9 @@ require("crayons").setup({
 })
 ```
 
+
 ### Configuring / setting up themes
+
 You can configure theme-specific settings above crayon's `setup()` function.
 
 ```lua
@@ -193,7 +214,9 @@ return {
                 -- ...
 ```
 
+
 ### Customizing Keybindings
+
 You can change the default keybinds used for switching themes.
 ```lua
 require("crayons").setup({
@@ -212,6 +235,8 @@ require("crayons").setup({
 })
 ```
 
+
 ## License
+
 crayons.nvim is released under the MIT License.
 
