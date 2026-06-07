@@ -140,6 +140,19 @@ local function switch_win_theme(colorscheme, background, transparent)
 end
 
 
+-- Apply or clear a window's theme, resetting styler's marker first
+-- so set_theme always re-applies even if the window was previously themed.
+local function apply_win_theme(win, theme)
+    if not vim.api.nvim_win_is_valid(win) then return end
+    vim.w[win].theme = nil
+    if theme then
+        Styler.set_theme(win, theme)
+    else
+        Styler.clear(win)
+    end
+end
+
+
 function M.load_config()
     local loaded_config = Config.load("theme_config")
     if loaded_config then
@@ -232,11 +245,7 @@ function M.setup(user_config)
             local theme = ft_themes_map[vim.bo[args.buf].filetype]
             for _, win in ipairs(vim.api.nvim_list_wins()) do
                 if vim.api.nvim_win_get_buf(win) == args.buf then
-                    if theme then
-                        Styler.set_theme(win, theme)
-                    else
-                        Styler.clear(win)
-                    end
+                    apply_win_theme(win, theme)
                 end
             end
         end
@@ -253,12 +262,7 @@ function M.setup(user_config)
                 local theme = ft_themes_map[vim.bo[buf].filetype]
                 for _, win in ipairs(vim.api.nvim_list_wins()) do
                     if vim.api.nvim_win_get_buf(win) == buf then
-                        if theme then
-                            vim.w[win].theme = nil
-                            Styler.set_theme(win, theme)
-                        else
-                            Styler.clear(win)
-                        end
+                        apply_win_theme(win, theme)
                     end
                 end
             end)
@@ -298,12 +302,7 @@ function M.setup(user_config)
                     end
                 end
 
-                if theme then
-                    vim.w[win].theme = nil
-                    Styler.set_theme(win, theme)
-                else
-                    Styler.clear(win)
-                end
+                apply_win_theme(win, theme)
             end)
         end
     })
@@ -321,8 +320,7 @@ function M.setup(user_config)
                         if not vim.api.nvim_buf_is_valid(buf) then return end
                         for _, win in ipairs(vim.api.nvim_list_wins()) do
                             if vim.api.nvim_win_get_buf(win) == buf then
-                                vim.w[win].theme = nil
-                                Styler.set_theme(win, {
+                                apply_win_theme(win, {
                                     colorscheme = ft_theme.colorscheme,
                                     background  = ft_theme.background,
                                 })
