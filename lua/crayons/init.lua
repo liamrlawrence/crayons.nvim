@@ -21,15 +21,15 @@ M.crayon_config = {
 
     keybindings = {
         -- window
-        standard        = "<leader>ts",
-        dark            = "<leader>td",
-        darkest         = "<leader>tdd",
-        light           = "<leader>tl",
+        standard        = "<leader>tws",
+        dark            = "<leader>twd",
+        darkest         = "<leader>twdd",
+        light           = "<leader>twl",
         -- global
-        global_standard = "<leader>tgs",
-        global_dark     = "<leader>tgd",
-        global_darkest  = "<leader>tgdd",
-        global_light    = "<leader>tgl",
+        global_standard = "<leader>ts",
+        global_dark     = "<leader>td",
+        global_darkest  = "<leader>tdd",
+        global_light    = "<leader>tl",
     },
 
     special_themes = {
@@ -227,7 +227,7 @@ function M.setup(user_config)
     -- NOTE: Catches case where ':set filetype=T' is manually run
     vim.api.nvim_create_autocmd("FileType", {
         group = theme_group,
-        desc = "Apply filetype theme to all windows showing this buffer",
+        desc = "Apply filetype theme when filetype is set",
         callback = function(args)
             local theme = ft_themes_map[vim.bo[args.buf].filetype]
             for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -245,7 +245,7 @@ function M.setup(user_config)
     -- NOTE: Catches cases where FileType won't re-fire, e.g. when an already-open buffer enters a window
     vim.api.nvim_create_autocmd("BufWinEnter", {
         group = theme_group,
-        desc = "Apply filetype theme to all windows showing this buffer",
+        desc = "Apply filetype theme when a buffer enters a window",
         callback = function(args)
             local buf = args.buf
             vim.schedule(function()

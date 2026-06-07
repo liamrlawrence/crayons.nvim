@@ -17,25 +17,25 @@ Crayons provides a straightforward way to quickly switch between your favorite t
 You can switch between themes and their variants through pre-configured keybindings:
 
 
-### Per-window
-
--   **Standard Theme**: `<leader>ts#` - Switch to the standard variant of a theme, where `#` is the theme number.
--   **Dark Theme**: `<leader>td#` - Switch to the dark variant of a theme.
--   **Darkest Theme**: `<leader>tdd#` - Switch to the darkest variant of a theme.
--   **Light Theme**: `<leader>tl#` - Switch to the light variant of a theme.
-
-
 ### Global
 
--   **Standard Theme**: `<leader>tgs#` - Switch the global baseline to the standard variant, where `#` is the theme number.
--   **Dark Theme**: `<leader>tgd#` - Switch the global baseline to the dark variant.
--   **Darkest Theme**: `<leader>tgdd#` - Switch the global baseline to the darkest variant.
--   **Light Theme**: `<leader>tgl#` - Switch the global baseline to the light variant.
+-   **Standard Theme**: `<leader>ts#` - Switch the global baseline to the standard variant, where `#` is the theme number.
+-   **Dark Theme**: `<leader>td#` - Switch the global baseline to the dark variant.
+-   **Darkest Theme**: `<leader>tdd#` - Switch the global baseline to the darkest variant.
+-   **Light Theme**: `<leader>tl#` - Switch the global baseline to the light variant.
+
+
+### Per-window
+
+-   **Standard Theme**: `<leader>tws#` - Switch to the standard variant of a theme, where `#` is the theme number.
+-   **Dark Theme**: `<leader>twd#` - Switch to the dark variant of a theme.
+-   **Darkest Theme**: `<leader>twdd#` - Switch to the darkest variant of a theme.
+-   **Light Theme**: `<leader>twl#` - Switch to the light variant of a theme.
 
 
 ## Requirements
 
-- Neovim 0.5+
+- Neovim 0.8.0+
 - [cabinet.nvim](https://github.com/liamrlawrence/cabinet.nvim) for configuration management.
 - [styler.nvim](https://github.com/folke/styler.nvim) for per-window themes.
 - The themes that you will be using.
@@ -222,15 +222,15 @@ You can change the default keybinds used for switching themes.
 require("crayons").setup({
     keybindings = {
         -- window
-        standard        = "<leader>ts",
-        dark            = "<leader>td",
-        darkest         = "<leader>tdd",
-        light           = "<leader>tl",
+        standard        = "<leader>tws",
+        dark            = "<leader>twd",
+        darkest         = "<leader>twdd",
+        light           = "<leader>twl",
         -- global
-        global_standard = "<leader>tgs",
-        global_dark     = "<leader>tgd",
-        global_darkest  = "<leader>tgdd",
-        global_light    = "<leader>tgl",
+        global_standard = "<leader>ts",
+        global_dark     = "<leader>td",
+        global_darkest  = "<leader>tdd",
+        global_light    = "<leader>tl",
     }
 })
 ```
