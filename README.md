@@ -5,7 +5,7 @@ Crayons provides a straightforward way to quickly switch between your favorite t
 ## Features
 
 - **Theme Management**: Easily switch between multiple themes with predefined variants.
-- **Custom Keybindings**: Assign custom keybindings for different themes and variants.
+- **Custom Keymaps**: Assign custom keymaps for different themes and variants.
 - **Transparency Support**: Option to enable or disable transparency for themes.
 - **Filetype Themes**: Set specific themes for designated filetypes or file patterns, rendered per-window simultaneously.
 - **Extensible**: Add more themes and configurations as needed.
@@ -14,23 +14,23 @@ Crayons provides a straightforward way to quickly switch between your favorite t
 
 ## Switching Themes
 
-You can switch between themes and their variants through pre-configured keybindings:
+You can switch between themes and their variants through pre-configured keymaps:
 
 
 ### Global
 
--   **Standard Theme**: `<leader>ts#` - Switch the global baseline to the standard variant, where `#` is the theme number.
--   **Dark Theme**: `<leader>td#` - Switch the global baseline to the dark variant.
--   **Darkest Theme**: `<leader>tdd#` - Switch the global baseline to the darkest variant.
--   **Light Theme**: `<leader>tl#` - Switch the global baseline to the light variant.
+- **Standard Theme**: `<leader>ts#` - Switch the global baseline to the standard variant, where `#` is the theme number.
+- **Dark Theme**: `<leader>td#` - Switch the global baseline to the dark variant.
+- **Darkest Theme**: `<leader>tdd#` - Switch the global baseline to the darkest variant.
+- **Light Theme**: `<leader>tl#` - Switch the global baseline to the light variant.
 
 
 ### Per-window
 
--   **Standard Theme**: `<leader>tws#` - Switch to the standard variant of a theme, where `#` is the theme number.
--   **Dark Theme**: `<leader>twd#` - Switch to the dark variant of a theme.
--   **Darkest Theme**: `<leader>twdd#` - Switch to the darkest variant of a theme.
--   **Light Theme**: `<leader>twl#` - Switch to the light variant of a theme.
+- **Standard Theme**: `<leader>tws#` - Switch to the standard variant of a theme, where `#` is the theme number.
+- **Dark Theme**: `<leader>twd#` - Switch to the dark variant of a theme.
+- **Darkest Theme**: `<leader>twdd#` - Switch to the darkest variant of a theme.
+- **Light Theme**: `<leader>twl#` - Switch to the light variant of a theme.
 
 
 ## Requirements
@@ -117,15 +117,15 @@ require("crayons").setup({
 
 ### Adding Special Themes
 
-Special themes are ones that have a single variant and you want to assign unique settings, such as transparency and a specific keybinding.
+Special themes are ones that have a single variant and you want to assign unique settings, such as transparency and a specific keymap.
 ```lua
 require("crayons").setup({
     special_themes = {
         {
-            colorscheme = "vscode",      -- colorscheme name
-            background = "dark",         -- "dark" or "light"
-            transparent = true,          -- true or false
-            keybinding = "<leader>ttv",  -- custom binding
+            colorscheme = "vscode",     -- colorscheme name
+            background = "dark",        -- "dark" or "light"
+            transparent = true,         -- true or false
+            keymap = "<leader>ttv",     -- custom mapping
         },
         -- ...
     }
@@ -215,12 +215,12 @@ return {
 ```
 
 
-### Customizing Keybindings
+### Customizing Keymaps
 
-You can change the default keybinds used for switching themes.
+You can change the default keymaps used for switching themes.
 ```lua
 require("crayons").setup({
-    keybindings = {
+    keymaps = {
         -- window
         standard        = "<leader>tws",
         dark            = "<leader>twd",

@@ -19,7 +19,7 @@ M.crayon_config = {
         -- Add more themes as needed
     },
 
-    keybindings = {
+    keymaps = {
         -- window
         standard        = "<leader>tws",
         dark            = "<leader>twd",
@@ -37,7 +37,7 @@ M.crayon_config = {
         --     colorscheme = "vscode",
         --     background = "dark",
         --     transparent = false,
-        --     keybinding = "<leader>ttv",
+        --     keymap = "<leader>ttv",
         -- },
     },
 
@@ -133,7 +133,7 @@ local function switch_win_theme(colorscheme, background, transparent)
         return
     end
     if transparent then
-        vim.notify("Per-window transparency is not supported; use the global keybind instead", vim.log.levels.WARN, { title = "crayons.nvim" })
+        vim.notify("Per-window transparency is not supported; use the global keymap instead", vim.log.levels.WARN, { title = "crayons.nvim" })
     end
     local win = vim.api.nvim_get_current_win()
     Styler.set_theme(win, { colorscheme = colorscheme, background = background })
@@ -187,12 +187,12 @@ function M.setup(user_config)
     set_global_theme(config.colorscheme, config.background, config.transparent)
     M.current_theme = config
 
-    -- Register keybinds for standard themes
+    -- Register keymaps for standard themes
     for index, theme_info in ipairs(M.crayon_config.themes) do
         local key_index = (index == 10) and 0 or index
         if key_index < 11 then                          -- NOTE: Themes 11+ will not be set!
             local variants = theme_info.variants or {}
-            local kb = M.crayon_config.keybindings
+            local kb = M.crayon_config.keymaps
 
             local standard = resolve_variant(variants.standard)
             local dark     = resolve_variant(variants.dark)
@@ -212,9 +212,17 @@ function M.setup(user_config)
         end
     end
 
-    -- Register keybinds for special themes
+    -- Register keymaps for special themes
     for _, special in ipairs(M.crayon_config.special_themes) do
-        vim.keymap.set("n", special.keybinding, function() switch_global_theme(special.colorscheme, special.background, special.transparent == true) end)
+        if not special.keymap then
+            vim.notify(
+                string.format("Special theme '%s' is missing 'keymap' field; skipping it", special.colorscheme or '?'),
+                vim.log.levels.WARN,
+                { title = "crayons.nvim" }
+            )
+        else
+            vim.keymap.set("n", special.keymap, function() switch_global_theme(special.colorscheme, special.background, special.transparent == true) end)
+        end
     end
 
     -- Build a filetype -> theme lookup from all filetype entries
