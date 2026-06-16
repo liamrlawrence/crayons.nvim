@@ -177,8 +177,8 @@ end
 -- so set_theme always re-applies even if the window was previously themed.
 local function apply_win_theme(win, theme)
     if not vim.api.nvim_win_is_valid(win) then return end
-    vim.w[win].theme = nil
     if theme then
+        vim.w[win].theme = nil
         Styler.set_theme(win, theme)
     else
         Styler.clear(win)
