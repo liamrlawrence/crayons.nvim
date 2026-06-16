@@ -312,6 +312,16 @@ function M.setup(user_config)
         end
     })
 
+    vim.api.nvim_create_autocmd("SessionLoadPre", {
+        group = theme_group,
+        desc = "Clear all styler namespaces before a session loads",
+        callback = function()
+            for _, win in ipairs(vim.api.nvim_list_wins()) do
+                pcall(Styler.clear, win)
+            end
+        end
+    })
+
 end
 
 
