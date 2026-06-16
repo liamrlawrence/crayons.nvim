@@ -135,11 +135,19 @@ require("crayons").setup({
 
 ### Adding Filetype Themes
 
+#### Matching
+
 Filetype themes assign a specific colorscheme based on either a filetype name or a filename glob pattern. Each window renders its theme independently, so splits with different filetypes will display different colorschemes simultaneously.
 
 Use `filetype` to match by Neovim filetype name, or `pattern` to match by filename glob. Both fields accept either a single string or a list of strings. Do not specify both on the same entry — if a buffer matches both, the pattern takes priority and the filetype entry is ignored.
 
-> **Note:** Transparency is not supported for filetype or pattern themes.
+#### Cache
+
+By default, each filetype theme's highlights are snapshotted once and cached for the session. Some plugins define their highlight groups into the global namespace lazily — only once a buffer of that type is opened — and a cached snapshot won't include them. For those filetypes, set `no_cache = true` so the theme rebuilds its highlights on every application, picking up the late-defined groups.
+
+#### Transparency
+
+Transparency is not supported for filetype or pattern themes.
 
 ```lua
 require("crayons").setup({
@@ -168,6 +176,14 @@ require("crayons").setup({
             pattern = { "*.h", "*.hh", "*.hpp" }, -- list of glob patterns
             colorscheme = "kanagawa-dragon",      -- colorscheme name
             background = "dark",                  -- "dark" or "light"
+        },
+
+        -- Org
+        {
+            filetype = "org",                     -- single filetype
+            colorscheme = "tokyonight-moon",      -- colorscheme name
+            background = "dark",                  -- "dark" or "light"
+            no_cache = true,                      -- rebuild each time
         },
         -- ...
     }

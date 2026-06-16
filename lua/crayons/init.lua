@@ -5,34 +5,50 @@ local Styler_theme = require("styler.theme")
 local M = {}
 
 
+
+---@class CrayonTheme
+---@field colorscheme string
+---@field background "light"|"dark"
+---@field filetype? string
+---@field no_cache? boolean
+
+
 -- HACK: Override Styler's load() so it snapshots ALL highlight groups from
 -- the global namespace after the colorscheme loads, instead of intercepting
 -- nvim_set_hl during load. The original misses groups defined late or outside
 -- nvim_set_hl, which fall through to the global theme. This introduces a flash
 -- on initial load of a colorscheme + background combination.
+
+local _cache = {}  -- ns_name -> true once built
+---@param theme CrayonTheme
 Styler_theme.load = function(theme)
-    local ns_name = table.concat({ "styler_", theme.colorscheme, theme.background or "" }, "_")
-    local create = not vim.api.nvim_get_namespaces()[ns_name]
+    local orig = Styler_theme.get_current()
+    local ns_name = table.concat({ "styler_", theme.colorscheme, theme.background}, "_")
+    .. (theme.no_cache and ("_" .. (theme.filetype or "unknown")) or "")
     local ns = vim.api.nvim_create_namespace(ns_name)
-    if create then
-        local orig = Styler_theme.get_current()
+    if _cache[ns_name] and not theme.no_cache then
+        return ns
+    end
 
-        -- load the target colorscheme fully into global, with autocmds enabled
-        -- so treesitter / integration groups that hook ColorScheme actually fire
-        pcall(function() require("lazy.core.loader").colorscheme(theme.colorscheme) end)
-        if theme.background then vim.go.background = theme.background end
-        vim.cmd("colorscheme " .. theme.colorscheme)
+    -- load the target colorscheme fully into global, with autocmds enabled
+    -- so treesitter / integration groups that hook ColorScheme actually fire
+    pcall(function() require("lazy.core.loader").colorscheme(theme.colorscheme) end)
+    if theme.background then vim.go.background = theme.background end
+    vim.cmd("colorscheme " .. theme.colorscheme)
 
-        -- snapshot EVERY defined highlight group into the namespace
-        for group, hl in pairs(vim.api.nvim_get_hl(0, {})) do
-            vim.api.nvim_set_hl(ns, group, hl)
-        end
+    -- snapshot EVERY defined highlight group into the namespace
+    for group, hl in pairs(vim.api.nvim_get_hl(0, {})) do
+        vim.api.nvim_set_hl(ns, group, hl)
+    end
 
-        -- restore the original global colorscheme
-        if orig.background then vim.go.background = orig.background end
-        if orig.colorscheme then
-            vim.cmd("colorscheme " .. orig.colorscheme)
-        end
+    -- restore the original global colorscheme
+    if orig.background then vim.go.background = orig.background end
+    if orig.colorscheme then
+        vim.cmd("colorscheme " .. orig.colorscheme)
+    end
+
+    if not theme.no_cache then
+        _cache[ns_name] = true
     end
     return ns
 end
@@ -269,6 +285,7 @@ function M.setup(user_config)
                 ft_themes_map[ft] = {
                     colorscheme = ft_theme.colorscheme,
                     background  = ft_theme.background,
+                    no_cache    = ft_theme.no_cache,
                 }
             end
         end
@@ -281,6 +298,7 @@ function M.setup(user_config)
     -- Resolve which theme (if any) a buffer should have.
     -- Patterns win over filetypes, matching the documented behavior.
     local function theme_for_buf(buf)
+        local ft = vim.bo[buf].filetype
         local bufname = vim.api.nvim_buf_get_name(buf)
         for _, ft_theme in ipairs(M.crayon_config.filetype_themes) do
             if ft_theme.pattern then
@@ -289,13 +307,24 @@ function M.setup(user_config)
                     if vim.fn.match(bufname, vim.fn.glob2regpat(pat)) >= 0 then
                         return {
                             colorscheme = ft_theme.colorscheme,
-                            background  = ft_theme.background,
+                            background  = ft_theme.background or "dark",
+                            filetype    = ft,
+                            no_cache    = ft_theme.no_cache == true,
                         }
                     end
                 end
             end
         end
-        return ft_themes_map[vim.bo[buf].filetype]
+        local ft_theme = ft_themes_map[ft]
+        if ft_theme then
+            return {
+                colorscheme = ft_theme.colorscheme,
+                background  = ft_theme.background or "dark",
+                filetype    = ft,
+                no_cache    = ft_theme.no_cache == true,
+            }
+        end
+        return nil
     end
 
     -- Re-evaluate a window against the buffer it shows right now,
