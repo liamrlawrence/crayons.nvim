@@ -1,8 +1,41 @@
 local Config = require("cabinet").config_manager
 local Styler = require("styler")
+local Styler_theme = require("styler.theme")
 
 local M = {}
 
+
+-- HACK: Override Styler's load() so it snapshots ALL highlight groups from
+-- the global namespace after the colorscheme loads, instead of intercepting
+-- nvim_set_hl during load. The original misses groups defined late or outside
+-- nvim_set_hl, which fall through to the global theme. This introduces a flash
+-- on initial load of a colorscheme + background combination.
+Styler_theme.load = function(theme)
+    local ns_name = table.concat({ "styler_", theme.colorscheme, theme.background or "" }, "_")
+    local create = not vim.api.nvim_get_namespaces()[ns_name]
+    local ns = vim.api.nvim_create_namespace(ns_name)
+    if create then
+        local orig = Styler_theme.get_current()
+
+        -- load the target colorscheme fully into global, with autocmds enabled
+        -- so treesitter / integration groups that hook ColorScheme actually fire
+        pcall(function() require("lazy.core.loader").colorscheme(theme.colorscheme) end)
+        if theme.background then vim.go.background = theme.background end
+        vim.cmd("colorscheme " .. theme.colorscheme)
+
+        -- snapshot EVERY defined highlight group into the namespace
+        for group, hl in pairs(vim.api.nvim_get_hl(0, {})) do
+            vim.api.nvim_set_hl(ns, group, hl)
+        end
+
+        -- restore the original global colorscheme
+        if orig.background then vim.go.background = orig.background end
+        if orig.colorscheme then
+            vim.cmd("colorscheme " .. orig.colorscheme)
+        end
+    end
+    return ns
+end
 
 
 M.crayon_config = {
